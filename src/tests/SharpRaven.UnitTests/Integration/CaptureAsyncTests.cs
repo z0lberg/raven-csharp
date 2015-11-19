@@ -46,10 +46,11 @@ namespace SharpRaven.UnitTests.Integration
     {
         #region SetUp/Teardown
 
-        [SetUp]
-        public void Setup()
+        [TestFixtureSetUp]
+        public void FixtureSetUp()
         {
             Console.WriteLine("Initializing RavenClient.");
+
             this.ravenClient = new RavenClient(DsnUrl)
             {
                 Logger = "C#",
@@ -63,6 +64,13 @@ namespace SharpRaven.UnitTests.Integration
             Helper.PrintInfo("Project ID: " + this.ravenClient.CurrentDsn.ProjectID);
         }
 
+
+        [TestFixtureTearDown]
+        public void FixtureTearDown()
+        {
+            this.ravenClient.Dispose();
+        }
+
         #endregion
 
         [Test]
@@ -72,19 +80,21 @@ namespace SharpRaven.UnitTests.Integration
 
             Exception hookedException = null;
 
-            this.ravenClient = new RavenClient(dsnUri)
+            using (var localRavenClient = new RavenClient(dsnUri)
             {
                 ErrorOnCapture = exp => hookedException = exp
-            };
+            })
+            {
 
-            Helper.PrintInfo("In test client change!");
-            Helper.PrintInfo("Sentry Uri: " + this.ravenClient.CurrentDsn.SentryUri);
-            Helper.PrintInfo("Port: " + this.ravenClient.CurrentDsn.Port);
-            Helper.PrintInfo("Public Key: " + this.ravenClient.CurrentDsn.PublicKey);
-            Helper.PrintInfo("Private Key: " + this.ravenClient.CurrentDsn.PrivateKey);
-            Helper.PrintInfo("Project ID: " + this.ravenClient.CurrentDsn.ProjectID);
+                Helper.PrintInfo("In test client change!");
+                Helper.PrintInfo("Sentry Uri: " + localRavenClient.CurrentDsn.SentryUri);
+                Helper.PrintInfo("Port: " + localRavenClient.CurrentDsn.Port);
+                Helper.PrintInfo("Public Key: " + localRavenClient.CurrentDsn.PublicKey);
+                Helper.PrintInfo("Private Key: " + localRavenClient.CurrentDsn.PrivateKey);
+                Helper.PrintInfo("Project ID: " + localRavenClient.CurrentDsn.ProjectID);
 
-            await this.ravenClient.CaptureExceptionAsync(Helper.GetException());
+                await localRavenClient.CaptureExceptionAsync(Helper.GetException());
+            }
 
             Assert.That(hookedException, Is.Not.Null);
         }
@@ -95,16 +105,18 @@ namespace SharpRaven.UnitTests.Integration
         {
             const string dsnUri = "http://a:b@totally.notexisting.xyz/666";
 
-            this.ravenClient = new RavenClient(dsnUri);
+            using (var localRavenClient = new RavenClient(dsnUri))
+            {
 
-            Helper.PrintInfo("In test client change!");
-            Helper.PrintInfo("Sentry Uri: " + this.ravenClient.CurrentDsn.SentryUri);
-            Helper.PrintInfo("Port: " + this.ravenClient.CurrentDsn.Port);
-            Helper.PrintInfo("Public Key: " + this.ravenClient.CurrentDsn.PublicKey);
-            Helper.PrintInfo("Private Key: " + this.ravenClient.CurrentDsn.PrivateKey);
-            Helper.PrintInfo("Project ID: " + this.ravenClient.CurrentDsn.ProjectID);
+                Helper.PrintInfo("In test client change!");
+                Helper.PrintInfo("Sentry Uri: " + localRavenClient.CurrentDsn.SentryUri);
+                Helper.PrintInfo("Port: " + localRavenClient.CurrentDsn.Port);
+                Helper.PrintInfo("Public Key: " + localRavenClient.CurrentDsn.PublicKey);
+                Helper.PrintInfo("Private Key: " + localRavenClient.CurrentDsn.PrivateKey);
+                Helper.PrintInfo("Project ID: " + localRavenClient.CurrentDsn.ProjectID);
 
-            await this.ravenClient.CaptureExceptionAsync(Helper.GetException());
+                await localRavenClient.CaptureExceptionAsync(Helper.GetException());
+            }
         }
 
 
@@ -115,6 +127,8 @@ namespace SharpRaven.UnitTests.Integration
                                                                   fingerprint : new[] { "f", "i", "n", "g", "e", "r" });
             Assert.That(id, Is.Not.Null);
             Assert.That(Guid.Parse(id), Is.Not.Null);
+
+            Console.WriteLine("[INFO] Sentry ID: " + id);
         }
 
 
@@ -167,19 +181,21 @@ namespace SharpRaven.UnitTests.Integration
 
             Exception hookedException = null;
 
-            this.ravenClient = new RavenClient(dsnUri)
+            using (var localRavenClient = new RavenClient(dsnUri)
             {
                 ErrorOnCapture = exp => hookedException = exp
-            };
+            })
+            {
 
-            Helper.PrintInfo("In test client change!");
-            Helper.PrintInfo("Sentry Uri: " + this.ravenClient.CurrentDsn.SentryUri);
-            Helper.PrintInfo("Port: " + this.ravenClient.CurrentDsn.Port);
-            Helper.PrintInfo("Public Key: " + this.ravenClient.CurrentDsn.PublicKey);
-            Helper.PrintInfo("Private Key: " + this.ravenClient.CurrentDsn.PrivateKey);
-            Helper.PrintInfo("Project ID: " + this.ravenClient.CurrentDsn.ProjectID);
+                Helper.PrintInfo("In test client change!");
+                Helper.PrintInfo("Sentry Uri: " + localRavenClient.CurrentDsn.SentryUri);
+                Helper.PrintInfo("Port: " + localRavenClient.CurrentDsn.Port);
+                Helper.PrintInfo("Public Key: " + localRavenClient.CurrentDsn.PublicKey);
+                Helper.PrintInfo("Private Key: " + localRavenClient.CurrentDsn.PrivateKey);
+                Helper.PrintInfo("Project ID: " + localRavenClient.CurrentDsn.ProjectID);
 
-            await this.ravenClient.CaptureMessageAsync("Test message");
+                await localRavenClient.CaptureMessageAsync("Test message");
+            }
 
             Assert.NotNull(hookedException);
         }
@@ -190,16 +206,18 @@ namespace SharpRaven.UnitTests.Integration
         {
             const string dsnUri = "http://a:b@totally.notexisting.xyz/666";
 
-            this.ravenClient = new RavenClient(dsnUri);
+            using (var localRavenClient = new RavenClient(dsnUri))
+            {
 
-            Helper.PrintInfo("In test client change!");
-            Helper.PrintInfo("Sentry Uri: " + this.ravenClient.CurrentDsn.SentryUri);
-            Helper.PrintInfo("Port: " + this.ravenClient.CurrentDsn.Port);
-            Helper.PrintInfo("Public Key: " + this.ravenClient.CurrentDsn.PublicKey);
-            Helper.PrintInfo("Private Key: " + this.ravenClient.CurrentDsn.PrivateKey);
-            Helper.PrintInfo("Project ID: " + this.ravenClient.CurrentDsn.ProjectID);
+                Helper.PrintInfo("In test client change!");
+                Helper.PrintInfo("Sentry Uri: " + localRavenClient.CurrentDsn.SentryUri);
+                Helper.PrintInfo("Port: " + localRavenClient.CurrentDsn.Port);
+                Helper.PrintInfo("Public Key: " + localRavenClient.CurrentDsn.PublicKey);
+                Helper.PrintInfo("Private Key: " + localRavenClient.CurrentDsn.PrivateKey);
+                Helper.PrintInfo("Project ID: " + localRavenClient.CurrentDsn.ProjectID);
 
-            await this.ravenClient.CaptureMessageAsync("Test message");
+                await localRavenClient.CaptureMessageAsync("Test message");
+            }
         }
 
 
@@ -207,10 +225,11 @@ namespace SharpRaven.UnitTests.Integration
         public async void CaptureMessageAsync_ReturnsValidID()
         {
             var id = await this.ravenClient.CaptureMessageAsync("Test");
-            //Console.WriteLine("Sent packet: " + id);
 
             Assert.That(id, Is.Not.Null);
             Assert.That(Guid.Parse(id), Is.Not.Null);
+
+            Console.WriteLine("[INFO] Sentry ID: " + id);
         }
 
 
@@ -233,10 +252,11 @@ namespace SharpRaven.UnitTests.Integration
             var args = Enumerable.Range(0, 5).Select(i => Guid.NewGuid()).Cast<object>().ToArray();
             var message = new SentryMessage("Lorem %s ipsum %s dolor %s sit %s amet %s.", args);
             var id = await this.ravenClient.CaptureMessageAsync(message);
-            //Console.WriteLine("Sent packet: " + id);
 
             Assert.That(id, Is.Not.Null);
             Assert.That(Guid.Parse(id), Is.Not.Null);
+
+            Console.WriteLine("[INFO] Sentry ID: " + id);
         }
 
 

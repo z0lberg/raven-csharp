@@ -49,7 +49,7 @@ namespace SharpRaven
     /// <summary>
     /// The Raven Client, responsible for capturing exceptions and sending them to Sentry.
     /// </summary>
-    public partial class RavenClient : IDisposable
+    public partial class RavenClient
     {
         private HttpClient httpClient;
 

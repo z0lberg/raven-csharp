@@ -95,6 +95,7 @@
     <Compile Include="Dsn.cs" />
     <Compile Include="Data\JsonPacket.cs" />
     <Compile Include="IRavenClient.cs" />
+    <Compile Include="IRavenClient.Net45.cs" />
     <Compile Include="Logging\Filters\CreditCardFilter.cs" />
     <Compile Include="Logging\Filters\PhoneNumberFilter.cs" />
     <Compile Include="Logging\Filters\SocialSecurityFilter.cs" />
