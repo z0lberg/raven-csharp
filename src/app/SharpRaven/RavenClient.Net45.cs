@@ -30,28 +30,40 @@
 
 #if !(net40)
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
-using SharpRaven.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
 using SharpRaven.Data;
+using SharpRaven.Utilities;
 
 namespace SharpRaven
 {
     /// <summary>
     /// The Raven Client, responsible for capturing exceptions and sending them to Sentry.
     /// </summary>
-    public partial class RavenClient
+    public partial class RavenClient : IDisposable
     {
+        private HttpClient httpClient;
+
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            if (this.httpClient != null)
+                this.httpClient.Dispose();
+        }
+
+
         /// <summary>
         /// Captures the <see cref="Exception" />.
         /// </summary>
@@ -71,14 +83,13 @@ namespace SharpRaven
                                                         string[] fingerprint = null,
                                                         object extra = null)
         {
-            JsonPacket packet = this.jsonPacketFactory.Create(CurrentDsn.ProjectID,
-                                                              exception,
-                                                              message,
-                                                              level,
-                                                              tags,
-                                                              fingerprint,
-                                                              extra);
-
+            var packet = this.jsonPacketFactory.Create(CurrentDsn.ProjectID,
+                                                       exception,
+                                                       message,
+                                                       level,
+                                                       tags,
+                                                       fingerprint,
+                                                       extra);
             return await SendAsync(packet, CurrentDsn);
         }
 
@@ -100,8 +111,7 @@ namespace SharpRaven
                                                       string[] fingerprint = null,
                                                       object extra = null)
         {
-            JsonPacket packet = this.jsonPacketFactory.Create(CurrentDsn.ProjectID, message, level, tags, fingerprint, extra);
-
+            var packet = this.jsonPacketFactory.Create(CurrentDsn.ProjectID, message, level, tags, fingerprint, extra);
             return await SendAsync(packet, CurrentDsn);
         }
 
@@ -119,40 +129,37 @@ namespace SharpRaven
             try
             {
                 packet = PreparePacket(packet);
+                var userAgent = new ProductInfoHeaderValue(PacketBuilder.ProductName, PacketBuilder.ProductVersion);
 
-                // TODO: HttpClient's constructor is locking shared (static) resources due to logging. Refactor this so it doesn't kill performance. @asbjornu
-                using (var client = new HttpClient { Timeout = Timeout })
+                this.httpClient = this.httpClient ?? new HttpClient { Timeout = Timeout };
+                this.httpClient.DefaultRequestHeaders.UserAgent.Add(userAgent);
+                this.httpClient.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+                this.httpClient.DefaultRequestHeaders.Add("X-Sentry-Auth", PacketBuilder.CreateAuthenticationHeader(dsn));
+                var data = packet.ToString(Formatting.None);
+
+                if (LogScrubber != null)
+                    data = LogScrubber.Scrub(data);
+
+                HttpContent content = new StringContent(data);
+
+                try
                 {
-                    var userAgent = new ProductInfoHeaderValue(PacketBuilder.ProductName, PacketBuilder.ProductVersion);
-                    client.DefaultRequestHeaders.UserAgent.Add(userAgent);
-                    client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
-                    client.DefaultRequestHeaders.Add("X-Sentry-Auth", PacketBuilder.CreateAuthenticationHeader(dsn));
-                    var data = packet.ToString(Formatting.None);
+                    if (Compression)
+                        content = new CompressedContent(content, "gzip");
 
-                    if (LogScrubber != null)
-                        data = LogScrubber.Scrub(data);
-
-                    HttpContent content = new StringContent(data);
-
-                    try
+                    using (var response = await this.httpClient.PostAsync(dsn.SentryUri, content))
                     {
-                        if (Compression)
-                            content = new CompressedContent(content, "gzip");
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        if (responseContent == null)
+                            return null;
 
-                        using (var response = await client.PostAsync(dsn.SentryUri, content))
-                        {
-                            var responseContent = await response.Content.ReadAsStringAsync();
-                            if (responseContent == null)
-                                return null;
-
-                            var responseJson = JsonConvert.DeserializeObject<dynamic>(responseContent);
-                            return responseJson.id;
-                        }
+                        var responseJson = JsonConvert.DeserializeObject<dynamic>(responseContent);
+                        return responseJson.id;
                     }
-                    finally
-                    {
-                        content.Dispose();
-                    }
+                }
+                finally
+                {
+                    content.Dispose();
                 }
             }
             catch (Exception ex)
