@@ -222,6 +222,8 @@ namespace SharpRaven.UnitTests.Integration
 
             Assert.That(id, Is.Not.Null);
             Assert.That(Guid.Parse(id), Is.Not.Null);
+
+            Console.WriteLine("[INFO] Sentry ID: " + id);
         }
 
 

@@ -31,7 +31,10 @@
 #if !(net40)
 
 using System.IO;
+using System.IO.Compression;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 using Newtonsoft.Json;
 
@@ -117,64 +120,120 @@ namespace SharpRaven
             {
                 packet = PreparePacket(packet);
 
-                var request = (HttpWebRequest)WebRequest.Create(dsn.SentryUri);
-                request.Timeout = (int)Timeout.TotalMilliseconds;
-                request.ReadWriteTimeout = (int)Timeout.TotalMilliseconds;
-                request.Method = "POST";
-                request.Accept = "application/json";
-                request.Headers.Add("X-Sentry-Auth", PacketBuilder.CreateAuthenticationHeader(dsn));
-                request.UserAgent = PacketBuilder.UserAgent;
-
-                if (Compression)
+                // TODO: HttpClient's constructor is locking shared (static) resources due to logging. Refactor this so it doesn't kill performance. @asbjornu
+                using (var client = new HttpClient { Timeout = Timeout })
                 {
-                    request.Headers.Add(HttpRequestHeader.ContentEncoding, "gzip");
-                    request.AutomaticDecompression = DecompressionMethods.Deflate;
-                    request.ContentType = "application/octet-stream";
-                }
-                else
-                    request.ContentType = "application/json; charset=utf-8";
+                    var userAgent = new ProductInfoHeaderValue(PacketBuilder.ProductName, PacketBuilder.ProductVersion);
+                    client.DefaultRequestHeaders.UserAgent.Add(userAgent);
+                    client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+                    client.DefaultRequestHeaders.Add("X-Sentry-Auth", PacketBuilder.CreateAuthenticationHeader(dsn));
+                    var data = packet.ToString(Formatting.None);
 
-                /*string data = packet.ToString(Formatting.Indented);
-            Console.WriteLine(data);*/
+                    if (LogScrubber != null)
+                        data = LogScrubber.Scrub(data);
 
-                string data = packet.ToString(Formatting.None);
+                    HttpContent content = new StringContent(data);
 
-                if (LogScrubber != null)
-                    data = LogScrubber.Scrub(data);
-
-                // Write the messagebody.
-                using (Stream s = await request.GetRequestStreamAsync())
-                {
-                    if (Compression)
-                        await GzipUtil.WriteAsync(data, s);
-                    else
+                    try
                     {
-                        using (StreamWriter sw = new StreamWriter(s))
+                        if (Compression)
+                            content = new CompressedContent(content, "gzip");
+
+                        using (var response = await client.PostAsync(dsn.SentryUri, content))
                         {
-                            await sw.WriteAsync(data);
+                            var responseContent = await response.Content.ReadAsStringAsync();
+                            if (responseContent == null)
+                                return null;
+
+                            var responseJson = JsonConvert.DeserializeObject<dynamic>(responseContent);
+                            return responseJson.id;
                         }
                     }
-                }
-
-                using (HttpWebResponse wr = (HttpWebResponse)(await request.GetResponseAsync()))
-                {
-                    using (Stream responseStream = wr.GetResponseStream())
+                    finally
                     {
-                        if (responseStream == null)
-                            return null;
-
-                        using (StreamReader sr = new StreamReader(responseStream))
-                        {
-                            string content = await sr.ReadToEndAsync();
-                            var response = JsonConvert.DeserializeObject<dynamic>(content);
-                            return response.id;
-                        }
+                        content.Dispose();
                     }
                 }
             }
             catch (Exception ex)
             {
                 return HandleException(ex);
+            }
+        }
+
+
+        /// <summary>
+        /// Compressed <see cref="HttpContent"/> class.
+        /// </summary>
+        /// <remarks>
+        /// Shamefully snitched from https://github.com/WebApiContrib/WebAPIContrib/blob/master/src/WebApiContrib/Content/CompressedContent.cs.
+        /// </remarks>
+        private class CompressedContent : HttpContent
+        {
+            private readonly string encodingType;
+            private readonly HttpContent originalContent;
+
+
+            public CompressedContent(HttpContent content, string encodingType)
+            {
+                if (content == null)
+                    throw new ArgumentNullException("content");
+
+                if (encodingType == null)
+                    throw new ArgumentNullException("encodingType");
+
+                this.originalContent = content;
+                this.encodingType = encodingType.ToLowerInvariant();
+
+                if (this.encodingType != "gzip" && this.encodingType != "deflate")
+                {
+                    throw new InvalidOperationException(
+                        string.Format("Encoding '{0}' is not supported. Only supports gzip or deflate encoding.", this.encodingType));
+                }
+
+                foreach (var header in this.originalContent.Headers)
+                    Headers.TryAddWithoutValidation(header.Key, header.Value);
+
+                Headers.ContentEncoding.Add(encodingType);
+            }
+
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                    this.originalContent.Dispose();
+
+                base.Dispose(disposing);
+            }
+
+
+            protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+            {
+                Stream compressedStream = null;
+
+                switch (this.encodingType)
+                {
+                    case "gzip":
+                        compressedStream = new GZipStream(stream, CompressionMode.Compress, true);
+                        break;
+                    case "deflate":
+                        compressedStream = new DeflateStream(stream, CompressionMode.Compress, true);
+                        break;
+                }
+
+                return this.originalContent.CopyToAsync(compressedStream).ContinueWith(tsk =>
+                {
+                    if (compressedStream != null)
+                        compressedStream.Dispose();
+                });
+            }
+
+
+            protected override bool TryComputeLength(out long length)
+            {
+                length = -1;
+
+                return false;
             }
         }
     }
