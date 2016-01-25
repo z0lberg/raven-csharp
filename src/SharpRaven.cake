@@ -1,21 +1,75 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <PropertyGroup>
-        <WorkingFolder>$(MSBuildProjectDirectory)</WorkingFolder>
-        <SolutionFile>SharpRaven.sln</SolutionFile>
-    </PropertyGroup>
+#!./packages/Cake.0.8.0/Cake.exe
 
-    <Target Name="Build" DependsOnTargets="CompileNET45;CompileNET40" />
+var target = Argument("target", "Default");
 
-    <Target Name="CompileNET45">
-        <Message Text="=== COMPILING Release 4.5 configuration ===" />
-        <MSBuild Projects="$(SolutionFile)"
-                 Properties="Configuration=Release 4.5" />
-    </Target>
+/*Task("Clean")
+    .Does(() =>
+{
+});*/
 
-    <Target Name="CompileNET40">
-        <Message Text="=== COMPILING Release 4.0 configuration ===" />
-        <MSBuild Projects="$(SolutionFile)"
-                 Properties="Configuration=Release 4.0" />
-    </Target>
-</Project>
+Task("Restore-NuGet-Packages")
+//    .IsDependentOn("Clean")
+    .Does(() =>
+{
+    NuGetRestore("./SharpRaven.sln");
+});
+
+Task("Build")
+    .IsDependentOn("Restore-NuGet-Packages")
+    .Does(() =>
+{
+    if (IsRunningOnWindows())
+    {
+      // Use MSBuild
+      MSBuild("./SharpRaven.sln", settings =>
+        settings.SetConfiguration("Release 4.0"));
+
+      MSBuild("./SharpRaven.sln", settings =>
+        settings.SetConfiguration("Release 4.5"));
+    }
+    else
+    {
+      // Use XBuild
+      XBuild("./SharpRaven.sln", settings =>
+        settings.SetConfiguration("Release 4.0"));
+
+      XBuild("./SharpRaven.sln", settings =>
+        settings.SetConfiguration("Release 4.5"));
+    }
+});
+
+Task("NuGet-Pack")
+    .Does(() =>
+{
+    // NuGet pack app\SharpRaven\SharpRaven.csproj -Properties ReleaseNotes='Test'
+    // NuGet pack app\SharpRaven.Nancy\SharpRaven.Nancy.csproj -Properties ReleaseNotes='Test'
+
+    NuGetPack("./app/SharpRaven/SharpRaven.csproj", new NuGetPackSettings
+    {
+        Id                      = "TestNuget",
+        Version                 = "0.0.0.1",
+        Title                   = "The tile of the package",
+        Authors                 = new[] {"John Doe"},
+        Owners                  = new[] {"Contoso"},
+        Description             = "The description of the package",
+        Summary                 = "Excellent summary of what the package does",
+        ProjectUrl              = new Uri("https://github.com/SomeUser/TestNuget/"),
+        IconUrl                 = new Uri("http://cdn.rawgit.com/SomeUser/TestNuget/master/icons/testnuget.png"),
+        LicenseUrl              = new Uri("https://github.com/SomeUser/TestNuget/blob/master/LICENSE.md"),
+        Copyright               = "Some company 2015",
+        ReleaseNotes            = new [] {"Bug fixes", "Issue fixes", "Typos"},
+        Tags                    = new [] {"Cake", "Script", "Build"},
+        RequireLicenseAcceptance= false,
+        Symbols                 = false,
+        NoPackageAnalysis       = true,
+        Files                   = new [] { new NuSpecContent {Source = "bin/TestNuget.dll", Target = "bin"}, },
+        BasePath                = "./src/TestNuget/bin/release",
+        OutputDirectory         = "./nuget"
+    });
+});
+
+Task("Default")
+    .IsDependentOn("Build");
+
+
+RunTarget(target);
