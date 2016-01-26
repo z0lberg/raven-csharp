@@ -49,12 +49,10 @@ Task("Test")
     if (!testFiles.Any())
         throw new FileNotFoundException("Could not find any tests");
 
-    NUnit(testFiles);
-
-    /*NUnit(new[] { "", "" }, new NUnitSettings
+    NUnit(testFiles, new NUnitSettings
     {
-        Framework = 
-    });*/
+        ToolPath = "./packages/NUnit.Runners.2.6.4/tools/nunit-console.exe"
+    });
 });
 
 
