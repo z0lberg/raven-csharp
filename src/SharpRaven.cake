@@ -52,7 +52,6 @@ Task("NuGet-Pack")
 
     NuGetPack("./app/SharpRaven/SharpRaven.nuspec", new NuGetPackSettings
     {
-        Id      		= "TestNuget",
         Version 		= gitVersion.NuGetVersion,
         Symbols         = true,
         ReleaseNotes	= new[] { "Test" }
@@ -60,7 +59,6 @@ Task("NuGet-Pack")
 
     NuGetPack("./app/SharpRaven.Nancy/SharpRaven.Nancy.nuspec", new NuGetPackSettings
     {
-        Id      		= "TestNuget",
         Version 		= gitVersion.NuGetVersion,
         Symbols         = true,
         ReleaseNotes	= new[] { "Test" }
