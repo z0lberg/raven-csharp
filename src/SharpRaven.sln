@@ -18,12 +18,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\.gitignore = ..\.gitignore
 		..\.gitmodules = ..\.gitmodules
 		..\.travis.yml = ..\.travis.yml
-		Build.cmd = Build.cmd
 		..\GitVersionConfig.yaml = ..\GitVersionConfig.yaml
 		..\LICENSE = ..\LICENSE
-		..\Makefile = ..\Makefile
 		..\README.md = ..\README.md
-		SharpRaven.cake = SharpRaven.cake
 		SharpRaven.sln.DotSettings = SharpRaven.sln.DotSettings
 	EndProjectSection
 EndProject
@@ -43,6 +40,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{F44F1C47-D
 		..\docs\make.bat = ..\docs\make.bat
 		..\docs\Makefile = ..\docs\Makefile
 		..\docs\sentry-doc-config.json = ..\docs\sentry-doc-config.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{00FB8A73-FE62-4A81-B2F5-9B756E634A24}"
+	ProjectSection(SolutionItems) = preProject
+		..\build\Build.cmd = ..\build\Build.cmd
+		..\build\Makefile = ..\build\Makefile
+		..\build\SharpRaven.cake = ..\build\SharpRaven.cake
 	EndProjectSection
 EndProject
 Global
@@ -172,5 +176,6 @@ Global
 		{ABE22746-6EEB-4970-A608-C02BC3B8BDA3} = {88CB5CD6-ACFA-441E-9FBB-E1E06F181B89}
 		{7FE52A2B-430C-4C6F-BEA9-0855AF973D0C} = {D2B3990A-A048-49F3-A697-A1DAEF82CE7F}
 		{F44F1C47-DCF1-472A-A2D1-7F132AA54339} = {BF6154D1-9BC4-4966-9506-BC33E81F317C}
+		{00FB8A73-FE62-4A81-B2F5-9B756E634A24} = {BF6154D1-9BC4-4966-9506-BC33E81F317C}
 	EndGlobalSection
 EndGlobal
