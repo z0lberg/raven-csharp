@@ -7,15 +7,16 @@ var target = Argument("target", "Default");
 {
 });*/
 
-Task("Restore-NuGet-Packages")
+Task("NuGet-Restore")
 //    .IsDependentOn("Clean")
     .Does(() =>
 {
     NuGetRestore("./SharpRaven.sln");
 });
 
+
 Task("Build")
-    .IsDependentOn("Restore-NuGet-Packages")
+    .IsDependentOn("NuGet-Restore")
     .Does(() =>
 {
     if (IsRunningOnWindows())
@@ -38,8 +39,27 @@ Task("Build")
     }
 });
 
-Task("NuGet-Pack")
+
+Task("Test")
     .IsDependentOn("Build")
+    .Does(() => 
+{
+    // mono --debug --runtime=v4.0.30319 ./src/packages/NUnit.Runners.2.6.4/tools/nunit-console.exe ./src/tests/SharpRaven.UnitTests/bin/Release/net45/SharpRaven.UnitTests.dll -exclude=NuGet,NoMono -nodots
+    var testFiles = GetFiles("./tests/**/Release/**/*.UnitTests.dll");
+    if (!testFiles.Any())
+        throw new FileNotFoundException("Could not find any tests");
+
+    NUnit(testFiles);
+
+    /*NUnit(new[] { "", "" }, new NUnitSettings
+    {
+        Framework = 
+    });*/
+});
+
+
+Task("NuGet-Pack")
+    .IsDependentOn("Test")
     .Does(() =>
 {
     var gitVersion = GitVersion(new GitVersionSettings
