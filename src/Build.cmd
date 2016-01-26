@@ -1,2 +1,2 @@
 @echo off
-.\packages\Cake.0.8.0\Cake.exe SharpRaven.cake
+.\packages\Cake.0.8.0\Cake.exe SharpRaven.cake -Target=NuGet-Pack

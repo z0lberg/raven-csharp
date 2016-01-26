@@ -39,37 +39,35 @@ Task("Build")
 });
 
 Task("NuGet-Pack")
+    .IsDependentOn("Build")
     .Does(() =>
 {
-    // NuGet pack app\SharpRaven\SharpRaven.csproj -Properties ReleaseNotes='Test'
-    // NuGet pack app\SharpRaven.Nancy\SharpRaven.Nancy.csproj -Properties ReleaseNotes='Test'
-
-    NuGetPack("./app/SharpRaven/SharpRaven.csproj", new NuGetPackSettings
+    var gitVersion = GitVersion(new GitVersionSettings
     {
-        Id                      = "TestNuget",
-        Version                 = "0.0.0.1",
-        Title                   = "The tile of the package",
-        Authors                 = new[] {"John Doe"},
-        Owners                  = new[] {"Contoso"},
-        Description             = "The description of the package",
-        Summary                 = "Excellent summary of what the package does",
-        ProjectUrl              = new Uri("https://github.com/SomeUser/TestNuget/"),
-        IconUrl                 = new Uri("http://cdn.rawgit.com/SomeUser/TestNuget/master/icons/testnuget.png"),
-        LicenseUrl              = new Uri("https://github.com/SomeUser/TestNuget/blob/master/LICENSE.md"),
-        Copyright               = "Some company 2015",
-        ReleaseNotes            = new [] {"Bug fixes", "Issue fixes", "Typos"},
-        Tags                    = new [] {"Cake", "Script", "Build"},
-        RequireLicenseAcceptance= false,
-        Symbols                 = false,
-        NoPackageAnalysis       = true,
-        Files                   = new [] { new NuSpecContent {Source = "bin/TestNuget.dll", Target = "bin"}, },
-        BasePath                = "./src/TestNuget/bin/release",
-        OutputDirectory         = "./nuget"
+        OutputType          = GitVersionOutput.Json,
+        UpdateAssemblyInfo  = false
+    });
+
+    Information("Version: {0}", gitVersion.NuGetVersion);
+
+    NuGetPack("./app/SharpRaven/SharpRaven.nuspec", new NuGetPackSettings
+    {
+        Id      		= "TestNuget",
+        Version 		= gitVersion.NuGetVersion,
+        Symbols         = true,
+        ReleaseNotes	= new[] { "Test" }
+    });
+
+    NuGetPack("./app/SharpRaven.Nancy/SharpRaven.Nancy.nuspec", new NuGetPackSettings
+    {
+        Id      		= "TestNuget",
+        Version 		= gitVersion.NuGetVersion,
+        Symbols         = true,
+        ReleaseNotes	= new[] { "Test" }
     });
 });
 
 Task("Default")
     .IsDependentOn("Build");
-
 
 RunTarget(target);
