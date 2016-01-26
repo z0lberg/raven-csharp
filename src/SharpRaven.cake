@@ -44,14 +44,13 @@ Task("Test")
     .IsDependentOn("Build")
     .Does(() => 
 {
-    // mono --debug --runtime=v4.0.30319 ./src/packages/NUnit.Runners.2.6.4/tools/nunit-console.exe ./src/tests/SharpRaven.UnitTests/bin/Release/net45/SharpRaven.UnitTests.dll -exclude=NuGet,NoMono -nodots
     var testFiles = GetFiles("./tests/**/Release/**/*.UnitTests.dll");
     if (!testFiles.Any())
         throw new FileNotFoundException("Could not find any tests");
 
     NUnit(testFiles, new NUnitSettings
     {
-        ToolPath = "./packages/NUnit.Runners.2.6.4/tools/nunit-console.exe"
+        ToolPath = GetFiles("./packages/**/tools/nunit-console.exe").First().ToString()
     });
 });
 
