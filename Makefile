@@ -8,5 +8,4 @@ restore:
 	mono --runtime=v4.0.30319 ".nuget/nuget.exe" Restore "src"
 
 test: restore
-	xbuild "./src/SharpRaven.build"
-	mono --debug --runtime=v4.0.30319 ./src/packages/NUnit.Runners.2.6.4/tools/nunit-console.exe ./src/tests/SharpRaven.UnitTests/bin/Release/net45/SharpRaven.UnitTests.dll -exclude=NuGet,NoMono -nodots
+	mono --debug --runtime=v4.0.30319 ./src/packages/Cake.0.8.0/Cake.exe ./src/SharpRaven.cake -Target=NuGet-Pack
