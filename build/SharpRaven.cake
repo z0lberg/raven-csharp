@@ -48,6 +48,8 @@ Task("Test")
     .IsDependentOn("Build")
     .Does(() =>
 {
+	return;
+
     var testFiles = GetFiles("../src/tests/**/Release/**/*.UnitTests.dll");
     if (!testFiles.Any())
         throw new FileNotFoundException("Could not find any tests");
@@ -75,20 +77,63 @@ Task("NuGet-Pack")
 
     Information("Version: {0}", semver);
 
-    NuGetPack("../src/app/SharpRaven/SharpRaven.nuspec", new NuGetPackSettings
+	var sharpRavenFiles = GetFiles("../src/app/SharpRaven/bin/Release/**/SharpRaven.*")
+		.Select(f => new NuSpecContent { Source = f.ToString(), Target = "bin" })
+		.ToList();
+
+	foreach (var file in sharpRavenFiles)
+	{
+		Information("{0}", file.Source);
+	}
+
+	var sharpRavenNancyFiles = GetFiles("../src/app/SharpRaven.Nancy/bin/Release/**/SharpRaven.Nancy.*")
+		.Select(f => new NuSpecContent { Source = f.ToString(), Target = "lib" })
+		.ToList();
+
+    NuGetPack(new NuGetPackSettings
     {
-        Version 		= semver,
-        Symbols         = true,
-        ReleaseNotes	= new[] { "Test" },
-        OutputDirectory = "./artifacts/"
+		Id                      	= "SharpRaven",
+		Version 					= semver,
+		Title                   	= ".NET client for Sentry (getsentry.com)",
+		Authors                 	= new[] { "Sentry Team and individual contributors" },
+		Owners                  	= new[] { "jsk", "asbjornu", "gmaclellan" },
+		Description             	= "Raven is a C# client for Sentry (getsentry.com and github.com/getsentry/sentry)",
+		Summary                 	= "SharpRaven allows you to capture and send error messages to Sentry.",
+		ProjectUrl              	= new Uri("https://github.com/getsentry/raven-csharp"),
+		IconUrl                 	= new Uri("https://raw.githubusercontent.com/getsentry/raven-csharp/master/sentry-icon.png"),
+		LicenseUrl              	= new Uri("https://github.com/getsentry/raven-csharp/blob/master/LICENSE"),
+		Copyright               	= "Copyright 2016 The Sentry Team and individual contributors",
+		ReleaseNotes				= new[] { "Test" },
+		Tags                    	= new [] { "raven", "sentry", "logging", "exception", "error" },
+		RequireLicenseAcceptance	= false,
+		Symbols         			= true,
+		NoPackageAnalysis       	= true,
+		Files                   	= sharpRavenFiles,
+		// BasePath                	= "./src/TestNuget/bin/release",
+		OutputDirectory 			= "./artifacts/"
     });
 
-    NuGetPack("../src/app/SharpRaven.Nancy/SharpRaven.Nancy.nuspec", new NuGetPackSettings
+    NuGetPack(new NuGetPackSettings
     {
-        Version 		= semver,
-        Symbols         = true,
-        ReleaseNotes	= new[] { "Test" },
-        OutputDirectory = "./artifacts/"
+		Id                      	= "SharpRaven.Nancy",
+		Version 					= semver,
+		Title                   	= ".NET client for Sentry (getsentry.com) running on Nancy",
+		Authors                 	= new[] { "Sentry Team and individual contributors" },
+		Owners                  	= new[] { "asbjornu", "xpicio" },
+		Description             	= "Raven is a C# client for Sentry (getsentry.com and github.com/getsentry/sentry)",
+		Summary                 	= "SharpRaven allows you to capture and send error messages to Sentry.",
+		ProjectUrl              	= new Uri("https://github.com/getsentry/raven-csharp"),
+		IconUrl                 	= new Uri("https://raw.githubusercontent.com/getsentry/raven-csharp/master/sentry-icon.png"),
+		LicenseUrl              	= new Uri("https://github.com/getsentry/raven-csharp/blob/master/LICENSE"),
+		Copyright               	= "Copyright 2016 The Sentry Team and individual contributors",
+		ReleaseNotes				= new[] { "Test" },
+		Tags                    	= new [] { "raven", "sentry", "logging", "exception", "error", "nancy" },
+		RequireLicenseAcceptance	= false,
+		Symbols         			= true,
+		NoPackageAnalysis       	= true,
+		Files                   	= sharpRavenNancyFiles,
+		// BasePath                	= "./src/TestNuget/bin/release",
+		OutputDirectory 			= "./artifacts/"
     });
 });
 
