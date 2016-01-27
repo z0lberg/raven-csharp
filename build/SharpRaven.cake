@@ -59,24 +59,26 @@ Task("NuGet-Pack")
     .IsDependentOn("Test")
     .Does(() =>
 {
-    var gitVersion = GitVersion(new GitVersionSettings
+    var gitVersion = IsRunningOnWindows() ? GitVersion(new GitVersionSettings
     {
         OutputType          = GitVersionOutput.Json,
         UpdateAssemblyInfo  = false
-    });
+    }) : null;
 
-    Information("Version: {0}", gitVersion.NuGetVersion);
+    var semver = gitVersion != null ? gitVersion.NuGetVersion : "0.0.1-mono";
 
-    NuGetPack("./app/SharpRaven/SharpRaven.nuspec", new NuGetPackSettings
+    Information("Version: {0}", semver);
+
+    NuGetPack("../src/app/SharpRaven/SharpRaven.nuspec", new NuGetPackSettings
     {
-        Version 		= gitVersion.NuGetVersion,
+        Version 		= semver,
         Symbols         = true,
         ReleaseNotes	= new[] { "Test" }
     });
 
     NuGetPack("./app/SharpRaven.Nancy/SharpRaven.Nancy.nuspec", new NuGetPackSettings
     {
-        Version 		= gitVersion.NuGetVersion,
+        Version 		= semver,
         Symbols         = true,
         ReleaseNotes	= new[] { "Test" }
     });
