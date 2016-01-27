@@ -2,6 +2,8 @@ language: csharp
 solution: src/SharpRaven.sln
 sudo: false
 install:
+  - cd build
   - make
 script:
+  - cd build
   - make test

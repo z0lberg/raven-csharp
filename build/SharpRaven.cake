@@ -1,17 +1,21 @@
-#!./packages/Cake.0.8.0/Cake.exe
+#!../src/packages/Cake.0.8.0/Cake.exe
 
 var target = Argument("target", "Default");
 
-/*Task("Clean")
+
+Task("Clean")
     .Does(() =>
 {
-});*/
+    CreateDirectory("./artifacts");
+    CleanDirectory("./artifacts");
+});
+
 
 Task("NuGet-Restore")
-//    .IsDependentOn("Clean")
+    .IsDependentOn("Clean")
     .Does(() =>
 {
-    NuGetRestore("./SharpRaven.sln");
+    NuGetRestore("../src/SharpRaven.sln");
 });
 
 
@@ -22,19 +26,19 @@ Task("Build")
     if (IsRunningOnWindows())
     {
       // Use MSBuild
-      MSBuild("./SharpRaven.sln", settings =>
+      MSBuild("../src/SharpRaven.sln", settings =>
         settings.SetConfiguration("Release 4.0"));
 
-      MSBuild("./SharpRaven.sln", settings =>
+      MSBuild("../src/SharpRaven.sln", settings =>
         settings.SetConfiguration("Release 4.5"));
     }
     else
     {
       // Use XBuild
-      XBuild("./SharpRaven.sln", settings =>
+      XBuild("../src/SharpRaven.sln", settings =>
         settings.SetConfiguration("Release 4.0"));
 
-      XBuild("./SharpRaven.sln", settings =>
+      XBuild("../src/SharpRaven.sln", settings =>
         settings.SetConfiguration("Release 4.5"));
     }
 });
@@ -42,15 +46,17 @@ Task("Build")
 
 Task("Test")
     .IsDependentOn("Build")
-    .Does(() => 
+    .Does(() =>
 {
-    var testFiles = GetFiles("./tests/**/Release/**/*.UnitTests.dll");
+    var testFiles = GetFiles("../src/tests/**/Release/**/*.UnitTests.dll");
     if (!testFiles.Any())
         throw new FileNotFoundException("Could not find any tests");
 
     NUnit(testFiles, new NUnitSettings
     {
-        ToolPath = GetFiles("./packages/**/tools/nunit-console.exe").First().ToString()
+        ResultsFile = "./artifacts/TestResults.xml",
+        Exclude = IsRunningOnWindows() ? null : "NoMono",
+        ToolPath = GetFiles("../src/packages/**/tools/nunit-console.exe").First().ToString(),
     });
 });
 
@@ -73,18 +79,22 @@ Task("NuGet-Pack")
     {
         Version 		= semver,
         Symbols         = true,
-        ReleaseNotes	= new[] { "Test" }
+        ReleaseNotes	= new[] { "Test" },
+        OutputDirectory = "./artifacts/"
     });
 
-    NuGetPack("./app/SharpRaven.Nancy/SharpRaven.Nancy.nuspec", new NuGetPackSettings
+    NuGetPack("../src/app/SharpRaven.Nancy/SharpRaven.Nancy.nuspec", new NuGetPackSettings
     {
         Version 		= semver,
         Symbols         = true,
-        ReleaseNotes	= new[] { "Test" }
+        ReleaseNotes	= new[] { "Test" },
+        OutputDirectory = "./artifacts/"
     });
 });
 
+
 Task("Default")
     .IsDependentOn("Build");
+
 
 RunTarget(target);
