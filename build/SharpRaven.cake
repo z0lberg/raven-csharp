@@ -90,7 +90,7 @@ Task("NuGet-Pack")
         .Select(f => new NuSpecContent { Source = f.ToString(), Target = "lib" })
         .ToList();
 
-    NuGetPack(new NuGetPackSettings
+    NuGetPack(/*"../src/app/SharpRaven/SharpRaven.nuspec",*/ new NuGetPackSettings
     {
         Id                          = "SharpRaven",
         Version                     = semver,
@@ -109,11 +109,12 @@ Task("NuGet-Pack")
         Symbols                     = true,
         NoPackageAnalysis           = true,
         Files                       = sharpRavenFiles,
-        // BasePath                    = "./src/TestNuget/bin/release",
+        BasePath                    = "././",
         OutputDirectory             = "./artifacts/"
+        // OutputDirectory             = "/Volumes/Dev/Misc/raven-csharp/build/artifacts/"
     });
 
-    NuGetPack(new NuGetPackSettings
+    NuGetPack(/*"../src/app/SharpRaven.Nancy/SharpRaven.Nancy.nuspec",*/ new NuGetPackSettings
     {
         Id                          = "SharpRaven.Nancy",
         Version                     = semver,
@@ -131,9 +132,10 @@ Task("NuGet-Pack")
         RequireLicenseAcceptance    = false,
         Symbols                     = true,
         NoPackageAnalysis           = true,
-        Files                       = sharpRavenNancyFiles,
-        // BasePath                    = "./src/TestNuget/bin/release",
+        // Files                       = sharpRavenNancyFiles,
+        BasePath                    = "././",
         OutputDirectory             = "./artifacts/"
+        //OutputDirectory             = "/Volumes/Dev/Misc/raven-csharp/build/artifacts/"
     });
 });
 
