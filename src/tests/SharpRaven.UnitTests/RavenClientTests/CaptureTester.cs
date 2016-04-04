@@ -143,7 +143,7 @@ namespace SharpRaven.UnitTests.RavenClientTests
         }
 
 
-        [Ignore]
+        [Ignore("")]
         public IRavenClient GetTestableRavenClient(string project)
         {
             var jsonPacketFactory = new TestableJsonPacketFactory(project);
