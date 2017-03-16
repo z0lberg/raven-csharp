@@ -34,6 +34,7 @@ using System.Linq;
 using System.Text;
 
 using Newtonsoft.Json;
+using SharpRavenPortable;
 
 namespace SharpRaven.Data
 {
@@ -51,8 +52,8 @@ namespace SharpRaven.Data
             if (exception == null)
                 return;
 
-            var trace = new StackTrace(exception, true);
-            var frames = trace.GetFrames();
+            var trace = new StackFrame(exception, true);
+            StackFrame[] frames = trace.GetFrames();
 
             if (frames == null)
                 return;

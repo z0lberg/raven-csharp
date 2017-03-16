@@ -58,25 +58,26 @@ namespace SharpRaven.Utilities
         /// </returns>
         public static IDictionary<string, string> GetModules()
         {
-            var assemblies = AppDomain.CurrentDomain
-                .GetAssemblies()
-                #if (!net35)
-                .Where(q => !q.IsDynamic)
-                #endif
-                .Select(a => a.GetName())
-                .OrderBy(a => a.Name);
+            //var assemblies = AppDomain.CurrentDomain
+            //    .GetAssemblies()
+            //    #if (!net35)
+            //    .Where(q => !q.IsDynamic)
+            //    #endif
+            //    .Select(a => a.GetName())
+            //    .OrderBy(a => a.Name);
 
-            var dictionary = new Dictionary<string, string>();
+            //var dictionary = new Dictionary<string, string>();
 
-            foreach (var assembly in assemblies)
-            {
-                if (dictionary.ContainsKey(assembly.Name))
-                    continue;
+            //foreach (var assembly in assemblies)
+            //{
+            //    if (dictionary.ContainsKey(assembly.Name))
+            //        continue;
 
-                dictionary.Add(assembly.Name, assembly.Version.ToString());
-            }
+            //    dictionary.Add(assembly.Name, assembly.Version.ToString());
+            //}
 
-            return dictionary;
+            //return dictionary;
+            return null;
         }
 
         /// <summary>
@@ -100,10 +101,10 @@ namespace SharpRaven.Utilities
             if (error == null)
                 return;
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("[ERROR] ");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine(error);
+            //Console.ForegroundColor = ConsoleColor.Red;
+            //Console.Write("[ERROR] ");
+            //Console.ForegroundColor = ConsoleColor.Gray;
+            //Console.WriteLine(error);
         }
 
         /// <summary>

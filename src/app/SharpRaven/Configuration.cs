@@ -28,64 +28,17 @@
 
 #endregion
 
-using System.Configuration;
+using PCLAppConfig;
 
 namespace SharpRaven
 {
     /// <summary>
     /// SharpRaven configuration class.
     /// </summary>
-    public class Configuration : ConfigurationSection
+    public class Configuration 
     {
         private const string DsnKey = "dsn";
 
-        private static readonly Configuration settings =
-            ConfigurationManager.GetSection("sharpRaven") as Configuration;
-
-        /// <summary>
-        /// Gets the &lt;dsn/&gt; configuration element.
-        /// </summary>
-        /// <value>
-        /// The &lt;dsn/&gt; configuration element.
-        /// </value>
-        [ConfigurationProperty(DsnKey, IsKey = true)]
-        public DsnElement Dsn
-        {
-            get { return (DsnElement)base[DsnKey]; }
-        }
-
-        /// <summary>
-        /// Gets the &lt;sharpRaven/&gt; configuration element.
-        /// </summary>
-        /// <value>
-        /// The the &lt;sharpRaven/&gt; configuration element.
-        /// </value>
-        public static Configuration Settings
-        {
-            get { return settings; }
-        }
-
-        #region Nested type: DsnElement
-
-        /// <summary>
-        /// The &lt;dsn/&gt; configuration element.
-        /// </summary>
-        public class DsnElement : ConfigurationElement
-        {
-            /// <summary>
-            /// Gets the value of the &lt;dsn/&gt; configuration element.
-            /// </summary>
-            /// <value>
-            /// The value of the &lt;dsn/&gt; configuration element.
-            /// </value>
-            [ConfigurationProperty("value")]
-            public string Value
-            {
-                get { return (string)this["value"]; }
-                set { this["value"] = value; }
-            }
-        }
-
-        #endregion
+     
     }
 }

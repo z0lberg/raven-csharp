@@ -29,8 +29,8 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Reflection;
 #if net35
@@ -39,6 +39,7 @@ using System.Web;
 using Newtonsoft.Json;
 
 using SharpRaven.Utilities;
+using System.Collections.Specialized;
 
 namespace SharpRaven.Data
 {
@@ -233,7 +234,7 @@ namespace SharpRaven.Data
         #if net35
         private static IDictionary<string, string> Convert(Func<HttpContext, NameValueCollection> collectionGetter)
         #else
-        private static IDictionary<string, string> Convert(Func<dynamic, NameObjectCollectionBase> collectionGetter)
+        private static IDictionary<string, string> Convert(Func<dynamic, ICollection> collectionGetter)
         #endif
 
         {
@@ -297,38 +298,7 @@ namespace SharpRaven.Data
 
         private static void TryGetHttpContextPropertyFromAppDomain()
         {
-            if (checkedForHttpContextProperty)
-                return;
-
-            checkedForHttpContextProperty = true;
-
-            try
-            {
-                var systemWeb = AppDomain.CurrentDomain
-                    .GetAssemblies()
-                    .FirstOrDefault(assembly => assembly.FullName.StartsWith("System.Web,"));
-
-                if (systemWeb == null)
-                    return;
-
-                var httpContextType = systemWeb.GetExportedTypes()
-                    .FirstOrDefault(type => type.Name == "HttpContext");
-
-                if (httpContextType == null)
-                    return;
-
-                var currentHttpContextProperty = httpContextType.GetProperty("Current",
-                                                                             BindingFlags.Static | BindingFlags.Public);
-
-                if (currentHttpContextProperty == null)
-                    return;
-
-                CurrentHttpContextProperty = currentHttpContextProperty;
-            }
-            catch (Exception exception)
-            {
-                SystemUtil.WriteError(exception);
-            }
+            return;
         }
     }
 }

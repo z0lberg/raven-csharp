@@ -103,7 +103,7 @@ namespace SharpRaven.Data
                 {
                     httpContext.Request.InputStream.Seek(0, SeekOrigin.Begin);
                     httpContext.Request.InputStream.CopyTo(stream);
-                    body = Encoding.UTF8.GetString(stream.ToArray());
+                    body = Encoding.UTF8.GetString(stream.ToArray(),0,(int)stream.Length);
                 }
 
                 converted = JsonConvert.DeserializeObject<Dictionary<string, object>>(body);
@@ -112,7 +112,7 @@ namespace SharpRaven.Data
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception);
+                //Console.WriteLine(exception);
             }
 
             return false;

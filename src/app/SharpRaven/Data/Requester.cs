@@ -71,20 +71,22 @@ namespace SharpRaven.Data
             this.data = new RequestData(this);
 
             this.webRequest = (HttpWebRequest)System.Net.WebRequest.Create(ravenClient.CurrentDsn.SentryUri);
-            this.webRequest.Timeout = (int)ravenClient.Timeout.TotalMilliseconds;
-            this.webRequest.ReadWriteTimeout = (int)ravenClient.Timeout.TotalMilliseconds;
+            //this.webRequest. Timeout = (int)ravenClient.Timeout.TotalMilliseconds;
+          //  this.webRequest.ReadWriteTimeout = (int)ravenClient.Timeout.TotalMilliseconds;
             this.webRequest.Method = "POST";
             this.webRequest.Accept = "application/json";
-            this.webRequest.Headers.Add("X-Sentry-Auth", PacketBuilder.CreateAuthenticationHeader(ravenClient.CurrentDsn));
-            this.webRequest.UserAgent = PacketBuilder.UserAgent;
+            var collection = new WebHeaderCollection();
+            collection["X-Sentry-Auth"] = PacketBuilder.CreateAuthenticationHeader(ravenClient.CurrentDsn);
+            this.webRequest.Headers = collection;
+           // this.webRequest.UserAgent = PacketBuilder.UserAgent;
 
-            if (ravenClient.Compression)
-            {
-                this.webRequest.Headers.Add(HttpRequestHeader.ContentEncoding, "gzip");
-                this.webRequest.AutomaticDecompression = DecompressionMethods.Deflate;
-                this.webRequest.ContentType = "application/octet-stream";
-            }
-            else
+            //if (ravenClient.Compression)
+            //{
+            //    this.webRequest.Headers.Add(HttpRequestHeader.ContentEncoding, "gzip");
+            //    this.webRequest.AutomaticDecompression = DecompressionMethods.Deflate;
+            //    this.webRequest.ContentType = "application/octet-stream";
+            //}
+            //else
                 this.webRequest.ContentType = "application/json; charset=utf-8";
         }
 
@@ -130,7 +132,7 @@ namespace SharpRaven.Data
         /// </returns>
         public string Request()
         {
-            using (var s = this.webRequest.GetRequestStream())
+            using (var s = this.webRequest.GetRequestStreamAsync().Result)
             {
                 if (this.ravenClient.Compression)
                     GzipUtil.Write(this.data.Scrubbed, s);
@@ -143,7 +145,7 @@ namespace SharpRaven.Data
                 }
             }
 
-            using (var wr = (HttpWebResponse)this.webRequest.GetResponse())
+            using (var wr = (HttpWebResponse)this.webRequest.GetResponseAsync().Result)
             {
                 using (var responseStream = wr.GetResponseStream())
                 {

@@ -155,7 +155,7 @@ namespace SharpRaven.Data
             Modules = SystemUtil.GetModules();
 
             // The current hostname
-            ServerName = System.Environment.MachineName;
+            ServerName = "TEST";//System.Environment.MachineName;
 
             // Create timestamp
             TimeStamp = DateTime.UtcNow;
@@ -357,16 +357,16 @@ namespace SharpRaven.Data
         {
             Message = exception.Message;
 
-            if (exception.TargetSite != null)
-            {
-                // ReSharper disable ConditionIsAlwaysTrueOrFalse => not for dynamic types.
-                Culprit = String.Format("{0} in {1}",
-                                        ((exception.TargetSite.ReflectedType == null)
-                                            ? "<dynamic type>"
-                                            : exception.TargetSite.ReflectedType.FullName),
-                                        exception.TargetSite.Name);
-                // ReSharper restore ConditionIsAlwaysTrueOrFalse
-            }
+            //if (exception.TargetSite != null)
+            //{
+            //    // ReSharper disable ConditionIsAlwaysTrueOrFalse => not for dynamic types.
+            //    Culprit = String.Format("{0} in {1}",
+            //                            ((exception.TargetSite.ReflectedType == null)
+            //                                ? "<dynamic type>"
+            //                                : exception.TargetSite.ReflectedType.FullName),
+            //                            exception.TargetSite.Name);
+            //    // ReSharper restore ConditionIsAlwaysTrueOrFalse
+            //}
 
             Exceptions = new List<SentryException>();
 

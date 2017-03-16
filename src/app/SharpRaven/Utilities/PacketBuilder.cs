@@ -46,9 +46,9 @@ namespace SharpRaven.Utilities
         /// </summary>
         static PacketBuilder()
         {
-            var assemblyName = typeof(PacketBuilder).Assembly.GetName();
-            var name = assemblyName.Name;
-            var version = assemblyName.Version;
+            var assemblyName = "TEST";//typeof(PacketBuilder).Assembly.GetName();
+            var name = "";//assemblyName.Name;
+            var version = "";//assemblyName.Version;
             userAgent = String.Format("{0}/{1}", name, version);
         }
 

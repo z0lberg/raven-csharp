@@ -60,7 +60,7 @@ namespace SharpRaven
         /// </summary>
         /// <param name="jsonPacketFactory">The optional factory that will be used to create the <see cref="JsonPacket" /> that will be sent to Sentry.</param>
         public RavenClient(IJsonPacketFactory jsonPacketFactory = null)
-            : this(new Dsn(Configuration.Settings.Dsn.Value), jsonPacketFactory)
+            : this(new Dsn(""), jsonPacketFactory)
         {
         }
 

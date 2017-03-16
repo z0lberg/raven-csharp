@@ -34,11 +34,12 @@ using System.Text;
 
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using SharpRavenPortable;
 
 namespace SharpRaven.Data
 {
     /// <summary>
-    /// Represents Sentry's version of <see cref="System.Diagnostics.StackFrame" />.
+    /// Represents Sentry's version of <see cref="StackFrame" />.
     /// </summary>
     // TODO: Rename this class to SentryExceptionFrame for consistency. -asbjornu
     public class ExceptionFrame
