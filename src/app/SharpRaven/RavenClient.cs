@@ -267,7 +267,7 @@ namespace SharpRaven
         /// <returns>
         /// The <see cref="JsonPacket.EventID" /> of the successfully captured <paramref name="exception" />, or <c>null</c> if it fails.
         /// </returns>
-        [Obsolete("Use Capture(SentryEvent) instead")]
+       // [Obsolete("Use Capture(SentryEvent) instead")]
         public string CaptureException(Exception exception,
                                        SentryMessage message = null,
                                        ErrorLevel level = ErrorLevel.Error,

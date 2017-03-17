@@ -49,13 +49,19 @@ namespace SharpRavenPortable
         //     The file line number, or 0 (zero) if the file line number cannot be determined.
         public virtual int GetFileLineNumber()
         {
-            return -1;
+            var trace = this.exception.StackTrace.Split(':');
+            int res = -1;
+            Int32.TryParse(trace[trace.Length-1].Trim(), out res);
+            return res;
         }
 
         [SecuritySafeCritical]
         public virtual string GetFileName()
         {
-            return string.Empty;
+            var trace = this.exception.StackTrace.Split(':');
+            var file = trace[trace.Length - 2].Split('\\');
+            string res = file[file.Length - 1];
+            return res;
         }
 
         //
@@ -74,7 +80,7 @@ namespace SharpRavenPortable
 
         internal StackFrame[] GetFrames()
         {
-            return null;
+            return new StackFrame[] {new StackFrame(exception,v), };
         }
 
         //
@@ -85,7 +91,9 @@ namespace SharpRavenPortable
         //     The method in which the frame is executing.
         public virtual MethodBase GetMethod()
         {
-            return null;
+            var propInfo = exception.GetType().GetRuntimeProperty("TargetSite");
+            MethodBase methodBase = (MethodBase)propInfo. GetValue(exception, null);
+            return methodBase;
         }
 
         //

@@ -38,6 +38,7 @@ using Newtonsoft.Json.Linq;
 
 using SharpRaven.Serialization;
 using SharpRaven.Utilities;
+using Xamarin.Forms;
 
 namespace SharpRaven.Data
 {
@@ -155,7 +156,7 @@ namespace SharpRaven.Data
             Modules = SystemUtil.GetModules();
 
             // The current hostname
-            ServerName = "TEST";//System.Environment.MachineName;
+            ServerName = Device.Idiom.ToString() + "_" + Device.OS.ToString() ;//System.Environment.MachineName;
 
             // Create timestamp
             TimeStamp = DateTime.UtcNow;
@@ -173,7 +174,7 @@ namespace SharpRaven.Data
             Project = "default";
 
             // Platform
-            Platform = "csharp";
+            Platform = "Xamarin";
 
             // Release
             Release = "";

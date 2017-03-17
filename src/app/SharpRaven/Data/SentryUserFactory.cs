@@ -51,7 +51,7 @@ namespace SharpRaven.Data
         {
             SentryUser user;
             if (!SentryRequestFactory.HasHttpContext)
-                user = new SentryUser("TEST");//new SentryUser(Environment.UserName);
+                user = new SentryUser("MobileCRM");//new SentryUser(Environment.UserName);
             else
             {
                 user = new SentryUser(GetPrincipal())

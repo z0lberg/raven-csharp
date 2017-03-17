@@ -75,10 +75,11 @@ namespace SharpRaven.Data
           //  this.webRequest.ReadWriteTimeout = (int)ravenClient.Timeout.TotalMilliseconds;
             this.webRequest.Method = "POST";
             this.webRequest.Accept = "application/json";
-            var collection = new WebHeaderCollection();
-            collection["X-Sentry-Auth"] = PacketBuilder.CreateAuthenticationHeader(ravenClient.CurrentDsn);
-            this.webRequest.Headers = collection;
-           // this.webRequest.UserAgent = PacketBuilder.UserAgent;
+            //  var collection = new WebHeaderCollection();
+            //   this.webRequest.Headers = collection;
+            this.webRequest.Headers["X-Sentry-Auth"] = PacketBuilder.CreateAuthenticationHeader(ravenClient.CurrentDsn);
+           // this.webRequest.Headers["User-Agent"] = PacketBuilder.UserAgent;
+            // this.webRequest.UserAgent = PacketBuilder.UserAgent;
 
             //if (ravenClient.Compression)
             //{
@@ -87,7 +88,7 @@ namespace SharpRaven.Data
             //    this.webRequest.ContentType = "application/octet-stream";
             //}
             //else
-                this.webRequest.ContentType = "application/json; charset=utf-8";
+            this.webRequest.ContentType = "application/json; charset=utf-8";
         }
 
 
